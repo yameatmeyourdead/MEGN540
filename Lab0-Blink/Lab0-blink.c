@@ -41,33 +41,24 @@
  */
 void blink_morse_str( char* str, uint16_t dot_length_ms )
 {
-    // INFO:  C-Strings are null-terminated (end in zero). You can use this to iterate through a c-string object without
-    // having to know its length explicitly (that's the whole point).
-    // Specifically: char* foo = "hi yo!"; gets stored as: [ 'h', 'i', ' ', 'y', 'o', '!', 0x00 ]
-
-    // BEGIN FUNCTION blink_string
-    // Define a counter variable of type uint8_t
-    // DO:
-    //      blink pattern for the str[counter] character with a dot-length specified by dot_length_ms
-    //      increment the counter
-    // WHILE: str[counter] is not null (0) and counter is < 255 (it's always good to work with an infinite-loop net)
-    //
-    // END FUNCTION
+    // iterate through str until null terminator or index == 255
+    char character;
+    int i = 0;
+    while( ( ( character = str[i] ) != 0 ) && i < 255 ) {
+        // blink the morse code corresponding to the character at index i
+        blink_morse_char( character, dot_length_ms );
+        // increment index
+        i++;
+    }
 }
 
 int main()
 {
     initialize_LED();
-    const uint16_t dot_length_ms = 250;
+    const uint16_t dot_length_ms = 100;
 
     while( 1 ) {
-        // blink message!
-        blink_morse_char( 'S', dot_length_ms );
-        blink_morse_char( 'O', dot_length_ms );
-        blink_morse_char( 'S', dot_length_ms );
-        blink_morse_char( ' ', dot_length_ms );
-
-        // Using your blink_morse_str function this would be called as:
-        // blink_morse_str("SOS ", dot_length_ms);
+        // Blink "hello world "
+        blink_morse_str( "Hello World ", dot_length_ms );
     }
 }
