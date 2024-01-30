@@ -1,7 +1,7 @@
 {
         "editor.formatOnSave": true,
         "editor.formatOnPaste": false,
-        "clang-format.executable": "/usr/bin/clang-format-10",
+        "clang-format.executable": "/usr/bin/clang-format",
         "clang-format.language.c.enable": true,
         "clang-format.style": "file",
         "[c]": {
@@ -23,6 +23,15 @@
         "files.associations": {
                 "lab1_tasks.h": "c",
                 "serialio.h": "c",
-                "ring_buffer.h": "c"
+                "ring_buffer.h": "c",
+                "io.h": "c",
+                "iom32u4.h": "c",
+                "common.h": "c",
+                "portpins.h": "c",
+                "usb.h": "c",
+                "cdcclassdevice.h": "c",
+                "usbmode.h": "c",
+                "message_handling.h": "c",
+                "task_management.h": "c"
         }
 }

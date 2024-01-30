@@ -6,7 +6,7 @@
                 "**",
                 "${workspaceFolder}/c_lib/**",
                 "/usr/lib/avr/**",
-                "${workspaceFolder}/lufa"
+                "${workspaceFolder}/lufa/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
