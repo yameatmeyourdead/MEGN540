@@ -147,6 +147,8 @@ void Task_Message_Handling( float _time_since_last )
             break;
         default:
             // What to do if you dont recognize the command character
+            USB_Flush_Input_Buffer();
+            USB_Send_Str( "?" + command );
             break;
     }
 
