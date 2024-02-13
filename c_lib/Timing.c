@@ -50,9 +50,27 @@ static volatile uint32_t _count_ms = 0;
  */
 void Initialize_Timing()
 {
-    // *** MEGN540 Lab 2 ***
-    // YOUR CODE HERE
-    // Enable timing, setup prescalers, etc.
+    // setup timer to be in disconnected, ctc mode
+    TCCR0A &= ~( 1 << COM0A0 );  // set compare output mode A to disconnected
+    TCCR0A &= ~( 1 << COM0A1 );
+    TCCR0A &= ~( 1 << COM0B0 );  // set compare output mode B to disconnected
+    TCCR0A &= ~( 1 << COM0B1 );
+
+    TCCR0A &= ~( 1 << WGM00 );  // set waveform generation mode to CTC
+    TCCR0A |= ( 1 << WGM01 );
+    TCCR0B &= ~( 1 << WGM02 );
+
+    // setup prescaler
+    TCCR0B &= ~( 1 << CS02 );  // CS02 set to 0
+    TCCR0B |= ( 1 << CS00 );   // CS00 and CS01 are 1
+    TCCR0B |= ( 1 << CS01 );
+
+    // setup timer compare vector (250 clock cycles = 1 ms)
+    OCR0A = 0xFA;
+
+    // enable interrupt
+    TIMSK0 &= ~( 1 << OCIE0B );
+    TIMSK0 |= ( 1 << OCIE0A );
 
     _count_ms = 0;
 }
@@ -63,18 +81,14 @@ void Initialize_Timing()
  */
 float Timing_Get_Time_Sec()
 {
-    // *** MEGN540 Lab 2 ***
-    // YOUR CODE HERE
-    return 0;
+    return Timing_Get_Milli() / 1000.0;
 }
+
 Time_t Timing_Get_Time()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    Time_t time = {
-        .millisec = _count_ms,
-        .microsec = 0  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
-    };
+    Time_t time = { .millisec = _count_ms, .microsec = TCNT0 * 4 };
 
     return time;
 }
@@ -92,7 +106,7 @@ uint16_t Timing_Get_Micro()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+    return TCNT0 * 4;
 }
 
 /**
@@ -105,19 +119,17 @@ float Timing_Seconds_Since( const Time_t* time_start_p )
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     float delta_time = 0;
+    Time_t now       = Timing_Get_Time();
+    delta_time += ( now.millisec - time_start_p->millisec ) / 1e3 + ( now.microsec - time_start_p->microsec ) / 1e6;
+
     return delta_time;
 }
 
 /** This is the Interrupt Service Routine for the Timer0 Compare A feature.
  * You'll need to set the compare flags properly for it to work.
  */
-/*ISR( DEFINE THE COMPARISON TRIGGER )
+// setup interrupt service routine to increment milliseconds
+ISR( TIMER0_COMPA_vect )
 {
-    // *** MEGN540 Lab 2 ***
-    // YOUR CODE HERE
-    // YOU NEED TO RESET THE Timer0 Value to 0 again!
-
-    // take care of upticks of both our internal and external variables.
-    _count_ms ++;
-
-}*/
+    _count_ms++;
+};
