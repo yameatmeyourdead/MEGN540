@@ -46,6 +46,7 @@
 Task_t task_time_loop;                  ///<-- Lab 2: Indicates if the system should report time to complete a loop.
 Task_t task_send_time;                  ///<-- Lab 2: Indicates if the system should send the current time.
 Task_t task_message_handling_watchdog;  ///<-- LAB 2: Watchdog Timer for Flusing USB Input Messaging if incomplete message received.
+Task_t get_loop_time;
 
 // Put your lab-specific task functionality and data_structures (if necessary) here so it is accessable to both
 // message handeling and the Lab main loops.

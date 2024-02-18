@@ -8,5 +8,7 @@ void Send_Time_Now( float _time_since_last )
 
 void Send_Loop_Time( float _time_since_last )
 {
+    if( task_time_loop.run_period > 0 )
+        _time_since_last -= task_time_loop.run_period;
     USB_Send_Msg( "cf", 'T', &_time_since_last, sizeof( _time_since_last ) );
 }
