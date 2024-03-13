@@ -141,7 +141,7 @@ void Task_Message_Handling( float _time_since_last )
         case '~':
             if( USB_Msg_Length() >= _Message_Length( '~' ) ) {
                 // then process your reset by setting the task_restart flag defined in Lab1_Tasks.h
-                Task_Activate( &task_restart, -1 );
+                task_restart.is_active = true;
 
                 command_processed = true;
             }
@@ -187,6 +187,59 @@ void Task_Message_Handling( float _time_since_last )
                 command_processed = true;
             }
             break;
+
+        case 'e':
+            if( USB_Msg_Length() >= _Message_Length( 'e' ) ) {
+                USB_Msg_Get();
+
+                Send_Encoder_Message( 'e' );
+            }
+            break;
+
+        case 'E':
+            if( USB_Msg_Length() >= _Message_Length( 'E' ) ) {
+                USB_Msg_Get();
+
+                float repetition_time;
+
+                USB_Msg_Read_Into( &repetition_time, sizeof( repetition_time ) );
+
+                if( repetition_time > 0 ) {
+                    Task_Activate( &task_send_encoder_counts, repetition_time );
+                } else {
+                    Task_Cancel( &task_send_encoder_counts );
+                }
+
+                command_processed = true;
+            }
+            break;
+        case 'b':
+            if( USB_Msg_Length() >= _Message_Length( 'b' ) ) {
+                USB_Msg_Get();
+
+                Send_Battery_Message( 'b' );
+
+                command_processed = true;
+            }
+            break;
+        case 'B':
+            if( USB_Msg_Length() >= _Message_Length( 'B' ) ) {
+                USB_Msg_Get();
+
+                float repetition_time;
+
+                USB_Msg_Read_Into( &repetition_time, sizeof( repetition_time ) );
+
+                if( repetition_time > 0 ) {
+                    Task_Activate( &task_send_battery_level, repetition_time );
+                } else {
+                    Task_Cancel( &task_send_battery_level );
+                }
+
+                command_processed = true;
+            }
+            break;
+
         default:
             // What to do if you dont recognize the command character
             USB_Flush_Input_Buffer();

@@ -61,15 +61,18 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Timing();
 
     // Setup task handling
-    Initialize_Task( &task_restart, Initialize_Modules /*function pointer to call*/ );
+    Initialize_Task( &task_restart, &Initialize_Modules /*function pointer to call*/ );
 
     // Setup message handling to get processed at some desired rate.
-    Initialize_Task( &task_message_handling, Task_Message_Handling );
+    Initialize_Task( &task_message_handling, &Task_Message_Handling );
 
     // Lab 2 tasks
     Initialize_Task( &task_time_loop, &Send_Loop_Time );
     Initialize_Task( &task_send_time, &Send_Time_Now );
     Initialize_Task( &task_message_handling_watchdog, Task_Message_Handling_Watchdog );
+
+    Task_Activate( &task_message_handling_watchdog, 0.25f );
+    Task_Activate( &task_message_handling, 0.f );
 }
 
 /** Main program entry point. This routine configures the hardware required by the application, then
@@ -80,7 +83,7 @@ int main( void )
     Initialize_USB();
     Initialize_Modules( 0.0 );
     Task_Activate( &task_message_handling_watchdog, 0.25f );
-    Task_Activate( &task_message_handling, 0 );
+    Task_Activate( &task_message_handling, 0.f );
 
     for( ;; ) {  // yet another way to do while (true)
         Task_USB_Upkeep();

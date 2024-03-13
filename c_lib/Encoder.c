@@ -1,4 +1,10 @@
+#define _USE_MATH_DEFINES
+
 #include "Encoder.h"
+
+#include "SerialIO.h"
+
+#include <math.h>
 
 /**
  * Internal counters for the Interrupts to increment or decrement as necessary.
@@ -18,28 +24,28 @@ static volatile int32_t _right_counts = 0;  // Static limits it's use to this fi
 // Hint, use avr's bit_is_set function to help
 static inline bool Right_XOR()
 {
-    return 0;
+    return PINE & ( 1 << PINE6 );
 }  // MEGN540 Lab 3 TODO
 static inline bool Right_B()
 {
-    return 0;
+    return PINF & ( 1 << PINF0 );
 }  // MEGN540 Lab 3 TODO
 static inline bool Right_A()
 {
-    return 0;
+    return Right_XOR() ^ Right_B();
 }  // MEGN540 Lab 3 TODO
 
 static inline bool Left_XOR()
 {
-    return 0;
+    return PINB & ( 1 << PINB4 );
 }  // MEGN540 Lab 3 TODO
 static inline bool Left_B()
 {
-    return 0;
+    return PINE & ( 1 << PINE2 );
 }  // MEGN540 Lab 3 TODO
 static inline bool Left_A()
 {
-    return 0;
+    return Left_XOR() ^ Left_B();
 }  // MEGN540 Lab 3 TODO
 
 /**
@@ -50,15 +56,31 @@ void Initialize_Encoders()
 {
     // *** MEGN540 Lab3 ***
     // YOUR CODE HERE
+    cli();
 
     // Left encoder uses PB4 and PE2 pins as digital inputs. External interrupt PCINT4 is necessary to detect
     // the change in XOR flag. You'll need to see Section 11.1.5 - 11.1.7 for setup and use.
     // Note that the PCINT interrupt is trigered by any PCINT pin. In the ISR you should check to make sure
     // the interrupt triggered is the one you intend on processing.
 
+    PCICR |= ( 1 << PCIE0 );
+    PCMSK0 |= ( 1 << PCINT4 );
+
+    DDRE &= ~( 1 << DDE2 );
+    DDRB &= ~( 1 << DDB4 );
+
     // Right encoder uses PE6 adn PF0 as digital inputs. External interrupt INT6 is necessary to detect
     // the changes in XOR flag. You'll need to see Sections 11.1.2-11.1.4 for setup and use.
     // You'll use the INT6_vect ISR flag.
+
+    EICRB |= ( 1 << ISC60 );
+    EICRB &= ~( 1 << ISC61 );
+    EIMSK |= ( 1 << INT6 );
+
+    DDRE &= ~( 1 << DDE6 );
+    DDRF &= ~( 1 << DDF0 );
+
+    sei();
 
     // Initialize static file variables. These probably need to be updated.
     _last_right_A = 0;  // MEGN540 Lab 3 TODO
@@ -83,7 +105,11 @@ int32_t Encoder_Counts_Left()
     // Note: Interrupts can trigger during a function call and an int32 requires
     // multiple clock cycles to read/save. You may want to stop interrupts, copy the value,
     // and re-enable interrupts to prevent this from corrupting your read/write.
-    return 0;
+    cli();
+    int counts = _left_counts;
+    sei();
+
+    return counts;
 }
 
 /**
@@ -97,7 +123,11 @@ int32_t Encoder_Counts_Right()
     // Note: Interrupts can trigger during a function call and an int32 requires
     // multiple clock cycles to read/save. You may want to stop interrupts, copy the value,
     // and re-enable interrupts to prevent this from corrupting your read/write.
-    return 0;
+    cli();
+    int counts = _right_counts;
+    sei();
+
+    return counts;
 }
 
 /**
@@ -108,7 +138,7 @@ float Encoder_Rad_Left()
 {
     // *** MEGN540 Lab3 ***
     // YOUR CODE HERE.  How many counts per rotation???
-    return 0;
+    return Encoder_Counts_Left() / 909.7 * 2 * M_PI;
 }
 
 /**
@@ -119,7 +149,7 @@ float Encoder_Rad_Right()
 {
     // *** MEGN540 Lab3 ***
     // YOUR CODE HERE.  How many counts per rotation???
-    return 0;
+    return Encoder_Counts_Right() / 909.7 * 2 * M_PI;
 }
 
 /**
@@ -127,16 +157,23 @@ float Encoder_Rad_Right()
  * the Pin Change Interrupts can trigger for multiple pins.
  * @return
  */
-// ISR()
-//{
-//
-//}
+ISR( PCINT0_vect )
+{
+    if( _last_left_XOR != Left_XOR() ) {
+        _left_counts += ( Left_A() ^ _last_left_B ) - ( _last_left_A ^ Left_B() );
+        _last_left_A   = Left_A();
+        _last_left_B   = Left_B();
+        _last_left_XOR = Left_XOR();
+    }
+}
 
 /**
  * Interrupt Service Routine for the right Encoder.
  * @return
  */
-// ISR()
-//{
-//
-//}
+ISR( INT6_vect )
+{
+    _right_counts += ( Right_A() ^ _last_right_B ) - ( _last_right_A ^ Right_B() );
+    _last_right_A = Right_A();
+    _last_right_B = Right_B();
+}
