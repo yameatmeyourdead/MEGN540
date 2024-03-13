@@ -140,6 +140,7 @@ void Task_Message_Handling( float _time_since_last )
             break;
         case '~':
             if( USB_Msg_Length() >= _Message_Length( '~' ) ) {
+                USB_Msg_Get();
                 // then process your reset by setting the task_restart flag defined in Lab1_Tasks.h
                 task_restart.is_active = true;
 
@@ -239,11 +240,135 @@ void Task_Message_Handling( float _time_since_last )
                 command_processed = true;
             }
             break;
+        case 'p':
+            /*
+                Set the PWM command for the left (first) and right (second)
+                side with the sign indicating direction, if power is in acceptable
+                range.
+            */
+            if( USB_Msg_Length() >= _Message_Length( 'p' ) ) {
+                USB_Msg_Get();
+
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t pwml;
+                    int16_t pwmr;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                if( Filter_Last_Output( &bat_filt ) < 1.0f ) {
+                    struct {
+                        char let[9];
+                    } data = { .let = { 'P', 'O', 'W', 'E', 'R', ' ', 'O', 'F', 'F' } };
+                    USB_Send_Msg( "c9s", '!', &data, sizeof( data ) );
+                    command_processed = true;
+                    break;
+                } else if( Filter_Last_Output( &bat_filt ) < 4.75f ) {
+                    struct {
+                        char let[7];
+                        float volts;
+                    } data = { .let = { 'B', 'A', 'T', ' ', 'L', 'O', 'W' }, .volts = Filter_Last_Output( &bat_filt ) };
+                    USB_Send_Msg( "c7sf", '!', &data, sizeof( data ) );
+                    command_processed = true;
+                    break;
+                }
+
+                MotorPWM_Set_Left( data.pwml );
+                MotorPWM_Set_Right( data.pwmr );
+
+                command_processed = true;
+            }
+            break;
+        case 'P':
+            /*
+                Set the PWM command for the left (first) and right (second)
+                side with the sign indicating direction,  if power is in
+                acceptable range. The following float provides the duration in
+                ms to have the PWM at the specified value, return to 0 PWM
+                (stopped) once that time duration is reached.
+            */
+            if( USB_Msg_Length() >= _Message_Length( 'P' ) ) {
+                USB_Msg_Get();
+
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t pwml;
+                    int16_t pwmr;
+                    float ms_active;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                if( Filter_Last_Output( &bat_filt ) < 1.0f ) {
+                    struct {
+                        char let[9];
+                    } data = { .let = { 'P', 'O', 'W', 'E', 'R', ' ', 'O', 'F', 'F' } };
+                    USB_Send_Msg( "c9s", '!', &data, sizeof( data ) );
+                    command_processed = true;
+                    break;
+                } else if( Filter_Last_Output( &bat_filt ) < 4.75f ) {
+                    struct {
+                        char let[7];
+                        float volts;
+                    } data = { .let = { 'B', 'A', 'T', ' ', 'L', 'O', 'W' }, .volts = Filter_Last_Output( &bat_filt ) };
+                    USB_Send_Msg( "c7sf", '!', &data, sizeof( data ) );
+                    command_processed = true;
+                    break;
+                }
+
+                MotorPWM_Set_Left( data.pwml );
+                MotorPWM_Set_Right( data.pwmr );
+                Task_Activate( &task_time_pwm, data.ms_active * 0.001f );
+
+                command_processed = true;
+            }
+            break;
+        case 's':
+            // Stop PWM and disable motor system
+            if( USB_Msg_Length() >= _Message_Length( 's' ) ) {
+                USB_Msg_Get();
+                StopPWMAndDisable();
+                command_processed = true;
+            }
+            break;
+        case 'S':
+            // Stop PWM and disable motor system
+            if( USB_Msg_Length() >= _Message_Length( 'S' ) ) {
+                USB_Msg_Get();
+                StopPWMAndDisable();
+                command_processed = true;
+            }
+            break;
+        case 'q':
+            if( USB_Msg_Length() >= _Message_Length( 'q' ) ) {
+                USB_Msg_Get();
+
+                Send_SII_Message( 'q' );
+
+                command_processed = true;
+            }
+            break;
+        case 'Q':
+            if( USB_Msg_Length() >= _Message_Length( 'Q' ) ) {
+                USB_Msg_Get();
+
+                float repetition_time;
+
+                USB_Msg_Read_Into( &repetition_time, sizeof( repetition_time ) );
+
+                if( repetition_time > 0 ) {
+                    Task_Activate( &task_sii, repetition_time );
+                } else {
+                    Task_Cancel( &task_sii );
+                }
+
+                command_processed = true;
+            }
+            break;
 
         default:
             // What to do if you dont recognize the command character
-            USB_Flush_Input_Buffer();
             USB_Send_Str( "?" + command );
+            USB_Flush_Input_Buffer();
             break;
     }
 

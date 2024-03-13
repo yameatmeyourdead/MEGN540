@@ -54,6 +54,6 @@ void Initialize_Battery_Monitor();
  */
 float Battery_Voltage();
 
-Filter_Data_t filt;
+Filter_Data_t bat_filt;
 
 #endif

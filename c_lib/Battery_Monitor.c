@@ -23,8 +23,8 @@ void Initialize_Battery_Monitor()
     ADCSRA |= ( 1 << ADEN );
 
     // initialize filter
-    Filter_Init( &filt, numerator, denominator, 4 );
-    Filter_SetTo( &filt, 5.0f );
+    Filter_Init( &bat_filt, numerator, denominator, 4 );
+    Filter_SetTo( &bat_filt, 5.0f );
 }
 
 /**
@@ -63,5 +63,5 @@ float Battery_Voltage()
 
     float bat_volt_measured = data.value * BITS_TO_BATTERY_VOLTS;
 
-    return Filter_Value( &filt, bat_volt_measured );
+    return Filter_Value( &bat_filt, bat_volt_measured );
 }

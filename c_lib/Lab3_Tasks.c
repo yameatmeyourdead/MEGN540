@@ -20,7 +20,7 @@ void Send_Encoder_Counts( float _time_since_last )
 
 void Send_Battery_Message( char message_type )
 {
-    float battery = Filter_Last_Output( &filt );
+    float battery = Filter_Last_Output( &bat_filt );
     USB_Send_Msg( "cf", message_type, &battery, sizeof( battery ) );
 }
 
@@ -36,7 +36,7 @@ void Send_Battery_Level( float _time_since_last )
 
 void Check_Battery_Level( float _time_since_last )
 {
-    float bat_volt = Filter_Last_Output( &filt );
+    float bat_volt = Filter_Last_Output( &bat_filt );
     struct __attribute__( ( __packed__ ) ) {
         char let[7];
         float volt;
