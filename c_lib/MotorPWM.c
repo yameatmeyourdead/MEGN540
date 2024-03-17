@@ -60,11 +60,17 @@ void MotorPWM_Set_Right( int16_t pwm )
 
 int16_t MotorPWM_Get_Left()
 {
-    return OCR1B;
+    if( PORTB &= ( 1 << PB2 ) )
+        return ~( OCR1B - 1 );
+
+    return OCR1B
 }
 
 int16_t MotorPWM_Get_Right()
 {
+    if( PORTB &= ( 1 << PB1 ) )
+        return ~( OCR1A - 1 );
+
     return OCR1A;
 }
 
