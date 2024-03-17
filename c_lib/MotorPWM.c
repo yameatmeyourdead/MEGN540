@@ -63,7 +63,7 @@ int16_t MotorPWM_Get_Left()
     if( PORTB &= ( 1 << PB2 ) )
         return ~( OCR1B - 1 );
 
-    return OCR1B
+    return OCR1B;
 }
 
 int16_t MotorPWM_Get_Right()
