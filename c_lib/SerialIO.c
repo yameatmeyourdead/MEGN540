@@ -116,19 +116,18 @@ static void _USB_Write_Data()
 
     /* Write byte from ring buffer to TX endpoint */
     // buffer length must not be 0 (have data to send)
-    if( rb_length_B( &_usb_send_buffer ) != 0 )
-        Endpoint_Write_8( rb_pop_front_B( &_usb_send_buffer ) );
-    // or, if buffer is exhausted do we still have bytes in the endpoint waiting to be sent?
-    else if( Endpoint_BytesInEndpoint() != 0 ) {
-        Endpoint_ClearIN();
-        return;
-    } else  // else we have nothing to do
-        return;
+    while( rb_length_B( &_usb_send_buffer ) != 0 ) {
+        if( Endpoint_BytesInEndpoint() == CDC_TXRX_EPSIZE ) {
+            Endpoint_ClearIN();
+        }
 
-    /* Finalize the stream transfer to send the packet */
-    // explicitly clear endpoint buffer when EPSIZE bytes have been sent to endpoint since last Endpoint_ClearIN call
-    if( Endpoint_BytesInEndpoint() == CDC_TXRX_EPSIZE ) {
+        Endpoint_Write_8( rb_pop_front_B( &_usb_send_buffer ) );
+    }
+
+    // or, if buffer is exhausted do we still have bytes in the endpoint waiting to be sent?
+    if( Endpoint_BytesInEndpoint() != 0 ) {
         Endpoint_ClearIN();
+        return;
     }
 }
 
