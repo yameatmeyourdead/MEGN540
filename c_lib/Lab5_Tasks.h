@@ -35,6 +35,7 @@
 #ifndef LAB5_TASKS_H
 #define LAB5_TASKS_H
 
+#include "Controller.h"
 #include "Task_Management.h"
 
 // Include your lab-specific headers here
@@ -42,9 +43,20 @@
 
 // Put your lab-specific tasks here
 // e.g. Task_t task_restart;  ///<-- Lab 1: This flag indicates that the device received a restart command from the hoast. Default inactive.
+Task_t task_update_controllers;
 
 // Put your lab-specific task functionality and data_structures (if necessary) here so it is accessable to both
 // message handeling and the Lab main loops.
 // e.g. void Send_Time_Now( float _time_since_last );
+void Update_Controllers( float _time_since_last );
+
+Controller_t Controller_L;
+Controller_t Controller_R;
+
+// TODO: Find
+float numL[5];
+float denL[5];
+float numR[5];
+float denR[5];
 
 #endif  // ifndef LAB5_TASKS_H
