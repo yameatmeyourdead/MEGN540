@@ -43,7 +43,7 @@ void Check_Battery_Level( float _time_since_last )
     } msg = { .let = { 'B', 'A', 'T', ' ', 'L', 'O', 'W' }, .volt = bat_volt };
 
     // Send Warning to Serial that batteries need to be charged
-    if( bat_volt < 3.6 ) {
+    if( bat_volt > 4 && bat_volt < 4.75 ) {
         USB_Send_Msg( "c7sf", '!', &msg, sizeof( msg ) );
     }
 }

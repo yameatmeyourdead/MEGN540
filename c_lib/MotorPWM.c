@@ -26,7 +26,7 @@ void MotorPWM_Enable( bool enable )
 
 bool MotorPWM_Is_Enabled()
 {
-    return TCCR1A & ( 1 << COM1A1 ) && TCCR1A & ( 1 << COM1B1 );
+    return TCCR1B & ( 1 << CS10 );
 }
 
 void MotorPWM_Set_Left( int16_t pwm )

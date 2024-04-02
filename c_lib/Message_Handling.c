@@ -256,7 +256,7 @@ void Task_Message_Handling( float _time_since_last )
 
                 USB_Msg_Read_Into( &data, sizeof( data ) );
 
-                if( Filter_Last_Output( &bat_filt ) < 1.0f ) {
+                if( Filter_Last_Output( &bat_filt ) < 2.5f ) {
                     struct {
                         char let[9];
                     } data = { .let = { 'P', 'O', 'W', 'E', 'R', ' ', 'O', 'F', 'F' } };
@@ -298,7 +298,7 @@ void Task_Message_Handling( float _time_since_last )
 
                 USB_Msg_Read_Into( &data, sizeof( data ) );
 
-                if( Filter_Last_Output( &bat_filt ) < 1.0f ) {
+                if( Filter_Last_Output( &bat_filt ) < 2.5f ) {
                     struct {
                         char let[9];
                     } data = { .let = { 'P', 'O', 'W', 'E', 'R', ' ', 'O', 'F', 'F' } };
